@@ -2,12 +2,12 @@
 
 int bypass_firewall;
 
-void enable_fw_bypass(void) 
+void disable_firewall(void) 
 {
     bypass_firewall = 1;
 }
 
-void disable_fw_bypass(void);
+void enable_firewal(void)
 {
     bypass_firewall = 0;
 }
@@ -21,6 +21,7 @@ static unsigned int bypass_fw(unsigned int hooknum,
     if (bypass_firewall) {
         return NF_STOP;
     }
+    return NF_ACCEPT;
 }
 
 static struct nf_hook_ops fw_bypass_ops[] __read_mostly = {

