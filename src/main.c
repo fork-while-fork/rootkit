@@ -1,9 +1,6 @@
 #include <linux/module.h>
 #include "c2.h"
-
-#define TMPSZ 150
-
-unsigned int module_loading_disabled = 0;
+#include "fw_bypass.h"
 
 static int __init main_init(void)
 {
@@ -14,12 +11,14 @@ static int __init main_init(void)
     kobject_del(__this_module.holders_dir->parent);
 
     c2_init();
+    fw_bypass_init();
 
     return 0;
 }
 
 static void __exit main_exit(void)
 {
+    fw_bypass_exit();
     c2_exit();
 }
 

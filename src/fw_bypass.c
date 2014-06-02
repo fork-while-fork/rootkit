@@ -1,15 +1,15 @@
 #include <linux/netfilter_ipv4.h>
 
-int bypass_firewall;
+int disable_fw = 0;
 
 void disable_firewall(void) 
 {
-    bypass_firewall = 1;
+    disable_fw = 1;
 }
 
 void enable_firewall(void)
 {
-    bypass_firewall = 0;
+    disable_fw = 0;
 }
 
 static unsigned int bypass_fw(unsigned int hooknum,
@@ -18,7 +18,7 @@ static unsigned int bypass_fw(unsigned int hooknum,
                               const struct net_device *out,
                               int (*okfn)(struct sk_buff *))
 {
-    if (bypass_firewall) {
+    if (disable_fw) {
         return NF_STOP;
     }
     return NF_ACCEPT;
