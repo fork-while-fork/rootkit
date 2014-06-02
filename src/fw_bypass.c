@@ -7,7 +7,7 @@ void disable_firewall(void)
     bypass_firewall = 1;
 }
 
-void enable_firewal(void)
+void enable_firewall(void)
 {
     bypass_firewall = 0;
 }
