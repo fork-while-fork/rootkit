@@ -1,6 +1,5 @@
 #include <linux/module.h>
 #include "c2.h"
-#include "fw_bypass.h"
 
 static int __init main_init(void)
 {

@@ -9,8 +9,9 @@ struct rkit_ext_ops {
 };
 
 struct rkit_ext_type {
+    unsigned int id;
     const struct rkit_ext_ops *ops;
-    struct list_head list;
+    struct hlist_node node;
     struct module *owner;
     const struct nla_policy *policy;
     unsigned int maxattr;

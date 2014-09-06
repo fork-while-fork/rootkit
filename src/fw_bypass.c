@@ -67,6 +67,7 @@ static struct rkit_ext_ops bypass_fw_ops __read_mostly = {
 };
 
 static struct rkit_ext_type bypass_fw_type __read_mostly = {
+    .id         = 0,
     .ops        = &bypass_fw_ops,
     .policy     = bypass_fw_policy,
     .maxattr    = BYPASS_FW_MAX,
