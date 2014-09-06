@@ -19,5 +19,7 @@ struct rkit_ext_type {
 
 void rkit_register_ext(struct rkit_ext_type *);
 void rkit_unregister_ext(struct rkit_ext_type *);
+struct rkit_ext_type *rkit_ext_by_id(unsigned int);
+int rkit_ext_parse(struct nlattr **, struct rkit_ext_type *, struct nlattr *);
 
 #endif /* __RKIT_EXT_H__ */

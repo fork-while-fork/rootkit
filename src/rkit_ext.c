@@ -1,5 +1,6 @@
 #include <linux/spinlock.h>
 #include <linux/hashtable.h>
+#include <linux/netlink.h>
 
 #include "rkit_ext.h"
 
@@ -58,5 +59,10 @@ struct rkit_ext_type *rkit_ext_by_id(unsigned int id)
     rkit_ext_unlock();
 
     return NULL;
+}
+
+int rkit_ext_parse(struct nlattr **tb, struct rkit_ext_type *ext, struct nlattr *attr)
+{
+    err = nla_parse_nested(tb, ext->maxattr, attr, ext->policy);
 }
 

