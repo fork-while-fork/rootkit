@@ -16,7 +16,8 @@ static int bypass_fw = 0;
 
 static void bypass_fw_eval(struct nlattr **tb)
 {
-    bypass_fw = 1;
+    printk(KERN_ERR "%d\n", nla_get_u8(tb[BYPASS_FW_ENABLE]));
+    //bypass_fw = 1;
 }
 
 
