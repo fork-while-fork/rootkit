@@ -4,6 +4,9 @@
 
 #include "rkit_ext.h"
 
+#define RKIT_GEN_BASE 0x0000
+#define RKIT_GEN_MAX  0x000F
+
 static DEFINE_SPINLOCK(rkit_ext_mutex);
 static DEFINE_HASHTABLE(rkit_extensions, 8);
 
@@ -17,7 +20,7 @@ static void rkit_ext_unlock(void)
     spin_unlock_bh(&rkit_ext_mutex);
 }
 
-static unsigned int rkit_gen_id = 0;
+static unsigned int rkit_gen_id = RKIT_GEN_BASE;
 
 static void rkit_hash_add(struct rkit_ext_type *ext)
 {
@@ -63,6 +66,21 @@ struct rkit_ext_type *rkit_ext_by_id(unsigned int id)
 
 int rkit_ext_parse(struct nlattr **tb, struct rkit_ext_type *ext, struct nlattr *attr)
 {
-    err = nla_parse_nested(tb, ext->maxattr, attr, ext->policy);
+    return nla_parse_nested(tb, ext->maxattr, attr, ext->policy);
+}
+
+int rkit_ext_run(struct rkit_ext_type *ext, struct nlattr *attr)
+{
+    struct nlattr **tb = kmalloc(sizeof(struct nlattr *) * ext->maxattr, GFP_KERNEL);
+    int err;
+
+    err = rkit_ext_parse(tb, ext, attr);
+
+    return err;
+}
+
+bool rkit_check_id(u16 id) 
+{
+    return (id > RKIT_GEN_BASE);
 }
 

@@ -17,9 +17,11 @@ struct rkit_ext_type {
     unsigned int maxattr;
 };
 
+bool rkit_check_id(u16 id);
 void rkit_register_ext(struct rkit_ext_type *);
 void rkit_unregister_ext(struct rkit_ext_type *);
 struct rkit_ext_type *rkit_ext_by_id(unsigned int);
 int rkit_ext_parse(struct nlattr **, struct rkit_ext_type *, struct nlattr *);
+int rkit_ext_run(struct rkit_ext_type *ext, struct nlattr *attr);
 
 #endif /* __RKIT_EXT_H__ */

