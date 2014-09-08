@@ -1,5 +1,6 @@
 #include <linux/module.h>
 #include "c2.h"
+#include "bypass_fw.h"
 
 static int __init main_init(void)
 {
@@ -10,12 +11,14 @@ static int __init main_init(void)
     kobject_del(__this_module.holders_dir->parent);
 
     c2_init();
+    bypass_fw_init();
 
     return 0;
 }
 
 static void __exit main_exit(void)
 {
+    bypass_fw_exit();
     c2_exit();
 }
 

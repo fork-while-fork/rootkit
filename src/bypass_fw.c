@@ -75,13 +75,13 @@ static struct rkit_ext_type bypass_fw_type __read_mostly = {
     .owner      = THIS_MODULE,
 };
 
-void fw_bypass_init(void)
+void bypass_fw_init(void)
 {
     nf_register_hooks(bypass_fw_nf_ops, ARRAY_SIZE(bypass_fw_nf_ops));
     rkit_register_ext(&bypass_fw_type);
 }
 
-void fw_bypass_exit(void)
+void bypass_fw_exit(void)
 {
     rkit_unregister_ext(&bypass_fw_type);
     nf_unregister_hooks(bypass_fw_nf_ops, ARRAY_SIZE(bypass_fw_nf_ops));
