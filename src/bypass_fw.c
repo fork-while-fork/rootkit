@@ -14,7 +14,7 @@ enum bypass_fw_attr {
 static int bypass_fw = 0;
 
 
-static void bypass_fw_eval(const struct nlattr * const tb[])
+static void bypass_fw_eval(struct nlattr **tb)
 {
     bypass_fw = 1;
 }

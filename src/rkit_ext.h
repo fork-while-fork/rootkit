@@ -5,7 +5,7 @@
 #include <net/netlink.h>
 
 struct rkit_ext_ops {
-    void (*eval)(const struct nlattr * const tb[]);
+    void (*eval)(struct nlattr **tb);
 };
 
 struct rkit_ext_type {
